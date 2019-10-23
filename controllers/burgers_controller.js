@@ -1,51 +1,32 @@
-let express = require('express');
+let express = require("express");
+let burger = require("../models/burger");
 let router = express.Router();
-let burger = require('../models/burger.js');
 
-//create routes
-
-router.get('/', function(req, res){
-    burger.all(function(data){
-        lethbsObject = {
-            cats: data
-        };
-    });
-});
-
-router.post('/api/burgers', function(req, res){
-    burger.create([
-        'name', "type"
-    ], [
-        req.body.name, req.body.sleepy
-    ], function(result) {
-        res.json({id: result.insertId});
-    }
-    );
-});
-
-router.put("/api/burgers/:id", function(req, res) {
-let condition = "id = " + req.params.id;
-    console.log("condition", condition);
-    burger.updateOne({ devoured: req.body.devoured }, condition, function(
-      result
-    ) {
-      if (result.changedRows === 0) {
-        return res.status(404).end();
-      } else {
-        res.status(200).end();
-      }
-    });
+// routes
+router.get("/", function(req, res) {
+  burger.selectAll(function(data) {
+    let hbsObject = {
+      burgers: data
+    };
+    console.log(hbsObject);
+    res.render("index", hbsObject);
   });
+});
 
-  router.delete('/api/burgers/:id', function(req, res){
-      let condition = 'id =' + req.params.id;
-      console.log('condition', condition);
-      burger.deleteOne(condition, function(result){
-          if (result.changedRows === condition) {
-              return res.status(404).end();
-          } else {res.status(200).end();}
-      })
-  })
+router.post("/", function(req, res) {
+  burger.insertOne(req.body.burger_name, function() {
+    res.redirect("/");
+  });
+});
 
-  //export
-  module.exports = router;
+router.put("/:id", function(req, res) {
+  let id = req.params.id;
+
+  burger.updateOne(id, function() {
+    devoured = true;
+    res.redirect("/");
+  });
+});
+
+//export
+module.exports = router;
